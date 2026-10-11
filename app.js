@@ -23,6 +23,7 @@ async function loadData() {
   console.log('features:', districts.features.length);
   console.log('first feature:', districts.features[0]);
   console.log('properties:', districts.features[0].properties);
+    fillProvinceList();
     draw(districts.features);
 }
 function show(value) {
@@ -48,6 +49,18 @@ function styleFor(feature) {
     fillColor: colourFor(feature.properties.pop_2023),
     fillOpacity: 0.8
   };
+}
+function fillProvinceList() {
+  const select = document.getElementById('province');
+  const provinces = [...new Set(
+    districts.features.map(f => f.properties.province)
+  )].sort();
+  for (const name of provinces) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
 }
 let layer = null;
 
@@ -94,3 +107,13 @@ legend.onAdd = function () {
   return div;
 };
 legend.addTo(map);
+document.getElementById('province')
+  .addEventListener('change', function (event) {
+    const chosen = event.target.value;
+    const subset = chosen === 'all'
+      ? districts.features
+      : districts.features.filter(
+          f => f.properties.province === chosen
+        );
+    draw(subset);
+  });
